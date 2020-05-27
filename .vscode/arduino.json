@@ -1,5 +1,5 @@
 {
-    "board": "arduino:avr:nano",
-    "configuration": "cpu=atmega328",
-    "sketch": "Binggo.ino"
+    "board": "arduino:avr:uno",
+    "sketch": "Binggo.ino",
+    "port": "COM6"
 }

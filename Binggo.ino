@@ -49,21 +49,21 @@
 
 #define NUMBER_OF_SERVICE             5
 ///Define.........................
-
+#define Said_interval                 100
 
 
 
 
 //Global var
-///vitrual timer
-uint8_t Service_timer[NUMBER_OF_SERVICE];
+    ///vitrual timer
+    uint8_t Service_timer[NUMBER_OF_SERVICE];
 
-
-///// Distance
-extern UltraSonicDistanceSensor distanceSensor;  // Initialize sensor that uses digital pins 13 and 12.
-///// Robot
-Robot Binggo;
-
+    ///// Distance
+    extern UltraSonicDistanceSensor distanceSensor;  // Initialize sensor that uses digital pins 13 and 12.
+    ///// Robot
+    Robot Binggo;
+    //buffer for debug
+    String binggo_number_define;
 
 // Main function here..........................................................................................
 
@@ -89,16 +89,54 @@ Serial.begin(115200);
  
 // Hello to bedug windows
   Binggo.Said("Helloooo");
+  attachInterrupt(1, FB_R_Counter, FALLING);
+  attachInterrupt(0, FB_L_Counter, FALLING);
+
+
+//Test............cant delete when done
+binggo_number_define =  String(perimeter_robot);
+// End test
 }
 
 void loop() {
-  Binggo.Said("Hi");
-  delay(500);
+
+  if(Service_timer[0] > Said_interval){
+        binggo_number_define =  String(perimeter_robot);
+        Binggo.Said(binggo_number_define);
+        binggo_number_define = String(Binggo.L_FB_Counter);
+        Binggo.Said(binggo_number_define);
+        binggo_number_define = String(Binggo.R_FB_Counter);
+        Binggo.Said(binggo_number_define);
+        Service_timer[0] = 0;
+  }
+
+  if(Service_timer[1] > 200)
+  {
+    Binggo.Run_caculator(12,1000);
+    Service_timer[1] = 0;
+  }      
+
 
 }
 
 
 // End of main................................................................................................
+
+//Counter feedback wheel
+void FB_L_Counter()
+{
+    Binggo.L_FB_Counter++;
+}
+
+void FB_R_Counter()
+{
+    Binggo.R_FB_Counter++;
+}
+
+
+
+
+
 // Interrupt for vitrual timer
 ISR (TIMER1_OVF_vect)
 {
