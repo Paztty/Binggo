@@ -6,6 +6,7 @@
 #include "Robot.h"
 #include "HCSR04.h"
 
+
 // Note for setup timer
           // BAUDRATE 115200
           // TCNT1 (start_counter) = 65536 - (timer * (16 * 10^6)/prescaler)
@@ -49,43 +50,50 @@
 
 #define NUMBER_OF_SERVICE             5
 ///Define.........................
-#define Said_interval                 100
+#define Said_interval                 10000
 
 
 
 
 //Global var
     ///vitrual timer
-    uint8_t Service_timer[NUMBER_OF_SERVICE];
+    unsigned int Service_timer[NUMBER_OF_SERVICE];
 
     ///// Distance
-    extern UltraSonicDistanceSensor distanceSensor;  // Initialize sensor that uses digital pins 13 and 12.
+    // Initialize sensor that uses digital pins 13 and 12.
+    ///// Servo
+    Servo head;
     ///// Robot
     Robot Binggo;
     //buffer for debug
     String binggo_number_define;
 
+    //fl var
+    uint8_t ss1_fl, ss2_fl, pos;
+
 // Main function here..........................................................................................
 
 void setup() {
 // setup Serial
-Serial.begin(115200);
+// Servo setup
+//head.attach(9);
+// Robot setup
+Binggo.init();
 // setup timer for calendar
   cli();																// tắt ngắt toàn cục
 
   /* Reset Timer/Counter1 */
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TIMSK1 = 0;
+  TCCR2A = 0;
+  TCCR2B = 0;
+  TIMSK2 = 0;
 
   /* Setup Timer/Counter1 */
-  TCCR1B |= (0 << CS12) | (1 << CS11) | (1 << CS10);  // prescale = 64
-  TCNT1 = START_COUNTER;
-  TIMSK1 = (1 << TOIE1); 							 // overflow interrupt enable
+  TCCR2B |= (0 << CS22) | (1 << CS21) | (1 << CS20);  // prescale = 64
+  TCNT2 = START_COUNTER;
+  TIMSK2 = (1 << TOIE2); 							 // overflow interrupt enable
   sei(); 															 // cho phép ngắt toàn cục
   
 // setup IO
-
  
 // Hello to bedug windows
   Binggo.Said("Helloooo");
@@ -94,29 +102,10 @@ Serial.begin(115200);
 
 
 //Test............cant delete when done
-binggo_number_define =  String(perimeter_robot);
-// End test
 }
 
 void loop() {
-
-  if(Service_timer[0] > Said_interval){
-        binggo_number_define =  String(perimeter_robot);
-        Binggo.Said(binggo_number_define);
-        binggo_number_define = String(Binggo.L_FB_Counter);
-        Binggo.Said(binggo_number_define);
-        binggo_number_define = String(Binggo.R_FB_Counter);
-        Binggo.Said(binggo_number_define);
-        Service_timer[0] = 0;
-  }
-
-  if(Service_timer[1] > 200)
-  {
-    Binggo.Run_caculator(12,1000);
-    Service_timer[1] = 0;
-  }      
-
-
+  Binggo.Run();
 }
 
 
@@ -136,13 +125,13 @@ void FB_R_Counter()
 
 
 
-
 // Interrupt for vitrual timer
-ISR (TIMER1_OVF_vect)
+ISR (TIMER2_OVF_vect)
 {
+  Binggo.Timer_for_sevice();
   for (unsigned char i = 0; i < NUMBER_OF_SERVICE; i++)
   {
     Service_timer[i]++;
   }  
-  TCNT1 = START_COUNTER;
+  TCNT2 = START_COUNTER;
 }
